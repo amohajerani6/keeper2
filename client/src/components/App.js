@@ -5,8 +5,8 @@ import Card from "./Card";
 import NewCard from "./newCard";
 import axios from "axios";
 
-function getCard(txt, id, removeCard) {
-  return <Card key="id" id={id} txt={txt} removeCard={removeCard} />;
+function getCard(content, id, removeCard) {
+  return <Card key={id} id={id} txt={content} removeCard={removeCard} />;
 }
 
 function App() {
@@ -15,13 +15,22 @@ function App() {
   useEffect(() => {
     async function fetchData() {
       const res = await axios.get("http://localhost:3001");
-      setAllCards(res);
+      setAllCards(res.data);
     }
     fetchData();
   }, []);
 
   function addCard(newCard) {
-    setAllCards([...allCards, newCard]);
+    // Add the new card to the db
+    async function postData(newCard) {
+      console.log("newCard", newCard);
+      await axios.post("http://localhost:3001", {
+        content: newCard,
+      });
+    }
+    postData(newCard);
+    // Add the new card to the UI
+    setAllCards([...allCards, { content: newCard }]);
   }
 
   function removeCard(id) {
@@ -40,8 +49,8 @@ function App() {
       <div>
         <NewCard addCard={addCard}></NewCard>
       </div>
-      {allCards.map(function (txt, id) {
-        return getCard(txt, id, removeCard);
+      {allCards.map(function (card, idx) {
+        return getCard(card.content, idx, removeCard);
       })}
       <Footer></Footer>
     </div>
