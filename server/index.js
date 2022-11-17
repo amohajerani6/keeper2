@@ -1,18 +1,19 @@
 const express = require("express");
+require("dotenv").config();
+
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const app = express();
 app.use(cors());
-//app.use(bodyParser.urlencoded({ extended: true }));
 const mongoModelItems = require("./mongoModelItems");
 app.use(express.json());
-mongoose.connect(
-  "mongodb+srv://amohajerani6:KpzxlEtnT8wlscCN@cluster0.piaytyc.mongodb.net/keeper?retryWrites=true&w=majority",
-  {
-    useNewUrlParser: true,
-  }
-);
+
+const dbLink = process.env.dbLink;
+
+mongoose.connect(dbLink + "/keeper?retryWrites=true&w=majority", {
+  useNewUrlParser: true,
+});
 
 app.get("/", async function (req, res) {
   try {
@@ -24,7 +25,6 @@ app.get("/", async function (req, res) {
 });
 
 app.post("/", async function (req, res) {
-  console.log("req.body ", req.body);
   var content = req.body.content;
   var newItem = new mongoModelItems({
     content: content,
