@@ -15,7 +15,7 @@ mongoose.connect(dbLink + "/keeper?retryWrites=true&w=majority", {
   useNewUrlParser: true,
 });
 
-app.get("/", async function (req, res) {
+app.get("/todo", async function (req, res) {
   try {
     var queryResults = await mongoModelItems.find({});
     res.send(JSON.stringify(queryResults));
@@ -24,7 +24,7 @@ app.get("/", async function (req, res) {
   }
 });
 
-app.post("/", async function (req, res) {
+app.post("/todo", async function (req, res) {
   var content = req.body.content;
   var newItem = new mongoModelItems({
     content: content,

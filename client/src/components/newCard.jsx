@@ -19,7 +19,7 @@ function NewCard({ addCard }) {
           value={item}
           onChange={(evt) => setItem(evt.target.value)}
         ></textarea>
-        <button type="submit" value="Submit">
+        <button type="submit" value="Submit" className="formBtn">
           <h1>+</h1>
         </button>
       </form>
