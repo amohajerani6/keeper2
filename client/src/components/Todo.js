@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from "react";
 import Header from "./Header";
-import Home from "./Home";
 import Footer from "./Footer";
 import Card from "./Card";
 import NewCard from "./newCard";
 import axios from "axios";
-import { Route, Routes } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function getCard(content, id, removeCard) {
   return <Card key={id} id={id} txt={content} removeCard={removeCard} />;
 }
 
 function Todo() {
+  var token = localStorage.getItem("token");
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!token) {
+      navigate("/");
+    }
+  }, []);
   const [allCards, setAllCards] = useState([]);
 
   useEffect(() => {
@@ -45,10 +51,21 @@ function Todo() {
     );
   }
 
+  function LogOutAction(e) {
+    localStorage.removeItem("token");
+
+    navigate("/");
+    //e.preventDefault();
+  }
+
   return (
     <>
       <div>
         <Header></Header>
+        <form onSubmit={LogOutAction}>
+          <button type="submit">Log out</button>
+        </form>
+
         <div>
           <NewCard addCard={addCard}></NewCard>
         </div>
