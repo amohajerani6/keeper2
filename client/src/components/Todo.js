@@ -11,15 +11,17 @@ function getCard(content, id, removeCard) {
 }
 
 function Todo() {
-  var token = localStorage.getItem("token");
+  var userInfo = JSON.parse(localStorage.getItem("token"));
   const navigate = useNavigate();
   useEffect(() => {
-    if (!token) {
+    if (!userInfo) {
       navigate("/");
     }
   }, []);
   const [allCards, setAllCards] = useState([]);
-
+  var name = userInfo.name;
+  console.log("name: ", name);
+  console.log("userInfo ", userInfo);
   useEffect(() => {
     async function fetchData() {
       const res = await axios.get("http://localhost:3001/todo");
@@ -62,7 +64,8 @@ function Todo() {
     <>
       <div>
         <Header></Header>
-        <form onSubmit={LogOutAction}>
+        <h1>Welcome {name}</h1>
+        <form onSubmit={LogOutAction} className="logOutbutton">
           <button type="submit">Log out</button>
         </form>
 

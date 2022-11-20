@@ -51,8 +51,16 @@ app.post("/login", async function (req, res) {
       bcrypt.compare(password, dbAccount.password, function (err, result) {
         if (result) {
           console.log("Account verified");
-          var token = generateToken(username);
-          res.json({ token: token });
+          console.log(dbAccount);
+          var token = generateToken({
+            name: dbAccount.name,
+            username: username,
+          });
+          res.json({
+            name: dbAccount.name,
+            username: dbAccount.username,
+            token: token,
+          });
         } else {
           console.log("Wrong password");
         }
@@ -66,6 +74,7 @@ app.post("/register", function (req, res) {
   bcrypt.hash(req.body.password, 5, function (err, hash) {
     // add to the db
     var newAccount = new mongoModelAccounts({
+      name: req.body.name,
       username: req.body.username,
       password: hash,
     });

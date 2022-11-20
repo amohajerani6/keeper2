@@ -11,17 +11,28 @@ function Register() {
       navigate("/todo");
     }
   }, []);
-  const [loginData, setLoginData] = useState({ username: "", password: "" });
-  const [sucess, setSucess] = useState(false);
+  const [loginData, setLoginData] = useState({
+    name: "",
+    username: "",
+    password: "",
+  });
 
   function onChangeFunc(event) {
     if (event.target.name === "username") {
       setLoginData({
+        name: loginData.name,
         username: event.target.value,
+        password: loginData.password,
+      });
+    } else if (event.target.name === "name") {
+      setLoginData({
+        name: event.target.value,
+        username: loginData.username,
         password: loginData.password,
       });
     } else {
       setLoginData({
+        name: loginData.name,
         username: loginData.username,
         password: event.target.value,
       });
@@ -30,7 +41,7 @@ function Register() {
 
   function handleRegistration(event) {
     // send the data to the server for authentication
-
+    console.log("data being sent for registration: ", loginData);
     axios
       .post("http://localhost:3001/register", loginData)
       .then(function (response) {
@@ -52,6 +63,13 @@ function Register() {
       <div className="loginPage">
         <h1>Registration</h1>
         <form onSubmit={handleRegistration}>
+          <input
+            name="name"
+            type="text"
+            placeholder="Name"
+            className="userInput"
+            onChange={onChangeFunc}
+          />
           <input
             name="username"
             type="text"

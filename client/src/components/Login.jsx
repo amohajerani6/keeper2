@@ -32,8 +32,9 @@ function Login() {
     axios
       .post("http://localhost:3001/login", loginData)
       .then(function (response) {
-        var token = response.data.token;
-        localStorage.setItem("token", token);
+        var token = response.data;
+        console.log("token ", token);
+        localStorage.setItem("token", JSON.stringify(token));
         navigate("./todo");
       })
       .catch(function (error) {

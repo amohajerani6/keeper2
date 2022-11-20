@@ -120,3 +120,10 @@ form textarea {
   cursor: pointer;
   outline: none;
 }
+
+.logOutbutton {
+  text-align: left;
+  margin: 0%;
+  background-color: #eee;
+  box-shadow:none
+}
