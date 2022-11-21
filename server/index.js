@@ -44,6 +44,7 @@ app.get("/todo", verify, async function (req, res) {
 });
 
 app.post("/todo", verify, async function (req, res) {
+  console.log("request came in");
   var content = req.body.content;
   var username = req.username;
   var newItem = new mongoModelItems({
@@ -56,9 +57,21 @@ app.post("/todo", verify, async function (req, res) {
 function generateToken(name, username) {
   console.log("name", name);
   console.log("username", username);
+  // Token expiry in 15 seconds
+  var token = jwt.sign(
+    { name: name, username: username, exp: Math.floor(Date.now() / 1000) + 10 },
+    process.env.TOKENSECRET
+  );
+  console.log(token);
+  return token;
+}
+
+function generateRefreshToken(name, username) {
+  console.log("name", name);
+  console.log("username", username);
   var token = jwt.sign(
     { name: name, username: username },
-    process.env.TOKENSECRET
+    process.env.REFRESHTOKENSECRET
   );
   console.log(token);
   return token;
@@ -79,10 +92,15 @@ app.post("/login", async function (req, res) {
         if (result) {
           console.log("Account verified");
           var token = generateToken(dbAccount.name, dbAccount.username);
+          var refreshToken = generateRefreshToken(
+            dbAccount.name,
+            dbAccount.username
+          );
           res.json({
             name: dbAccount.name,
             username: dbAccount.username,
             token: token,
+            refreshToken: refreshToken,
           });
         } else {
           console.log("Wrong password");

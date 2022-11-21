@@ -5,12 +5,14 @@ import Card from "./Card";
 import NewCard from "./newCard";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import RefreshIntercept from "./RefreshAuth";
 
 function getCard(content, id, removeCard) {
   return <Card key={id} id={id} txt={content} removeCard={removeCard} />;
 }
 
 function Todo() {
+  axios.interceptors.request.use(RefreshIntercept);
   var userInfo = JSON.parse(localStorage.getItem("token"));
   const navigate = useNavigate();
   useEffect(() => {
@@ -20,8 +22,6 @@ function Todo() {
   }, []);
   const [allCards, setAllCards] = useState([]);
   var name = userInfo.name;
-  console.log("name: ", name);
-  console.log("userInfo ", userInfo);
   useEffect(() => {
     async function fetchData() {
       const res = await axios.get("http://localhost:3001/todo", {
@@ -35,6 +35,7 @@ function Todo() {
   function addCard(content) {
     // Add the new card to the db
     async function postData(content) {
+      var userInfo = JSON.parse(localStorage.getItem("token"));
       await axios.post(
         "http://localhost:3001/todo",
         {

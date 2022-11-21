@@ -32,12 +32,13 @@ function Login() {
     axios
       .post("http://localhost:3001/login", loginData)
       .then(function (response) {
+        console.log("successfully logged in");
         var token = response.data;
-        console.log("token ", token);
         localStorage.setItem("token", JSON.stringify(token));
         navigate("./todo");
       })
       .catch(function (error) {
+        console.log("Did you ddddd");
         console.log("login error: ", error);
       });
 
