@@ -24,23 +24,31 @@ function Todo() {
   console.log("userInfo ", userInfo);
   useEffect(() => {
     async function fetchData() {
-      const res = await axios.get("http://localhost:3001/todo");
+      const res = await axios.get("http://localhost:3001/todo", {
+        headers: { authorization: "Bearer " + userInfo.token },
+      });
       setAllCards(res.data);
     }
     fetchData();
   }, []);
 
-  function addCard(newCard) {
+  function addCard(content) {
     // Add the new card to the db
-    async function postData(newCard) {
-      console.log("newCard", newCard);
-      await axios.post("http://localhost:3001/todo", {
-        content: newCard,
-      });
+    async function postData(content) {
+      await axios.post(
+        "http://localhost:3001/todo",
+        {
+          username: userInfo.username,
+          content: content,
+        },
+        {
+          headers: { authorization: "Bearer " + userInfo.token },
+        }
+      );
     }
-    postData(newCard);
+    postData(content);
     // Add the new card to the UI
-    setAllCards([...allCards, { content: newCard }]);
+    setAllCards([...allCards, { content: content }]);
   }
 
   function removeCard(id) {

@@ -16,25 +16,51 @@ mongoose.connect(dbLink + "/keeper?retryWrites=true&w=majority", {
   useNewUrlParser: true,
 });
 
-app.get("/todo", async function (req, res) {
+const verify = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split(" ")[1];
+
+    jwt.verify(token, process.env.TOKENSECRET, (err, user) => {
+      if (err) {
+        return res.status(403).json("Token is not valid!");
+      }
+      console.log("username from the token", user.username);
+      req.username = user.username;
+      next();
+    });
+  } else {
+    res.status(401).json("You are not authenticated!");
+  }
+};
+
+app.get("/todo", verify, async function (req, res) {
   try {
-    var queryResults = await mongoModelItems.find({});
+    var queryResults = await mongoModelItems.find({ username: req.username });
     res.send(JSON.stringify(queryResults));
   } catch (err) {
     console.log("error in adding data", err);
   }
 });
 
-app.post("/todo", async function (req, res) {
+app.post("/todo", verify, async function (req, res) {
   var content = req.body.content;
+  var username = req.username;
   var newItem = new mongoModelItems({
+    username: username,
     content: content,
   });
   await newItem.save();
 });
 
-function generateToken(username) {
-  var token = jwt.sign({ username: username }, process.env.TOKENSECRET);
+function generateToken(name, username) {
+  console.log("name", name);
+  console.log("username", username);
+  var token = jwt.sign(
+    { name: name, username: username },
+    process.env.TOKENSECRET
+  );
+  console.log(token);
   return token;
 }
 
@@ -46,16 +72,13 @@ app.post("/login", async function (req, res) {
     var dbAccount = await mongoModelAccounts.findOne({
       username: username,
     });
+    console.log("dbAccount", dbAccount);
     if (dbAccount) {
       // Check if the password is correct
       bcrypt.compare(password, dbAccount.password, function (err, result) {
         if (result) {
           console.log("Account verified");
-          console.log(dbAccount);
-          var token = generateToken({
-            name: dbAccount.name,
-            username: username,
-          });
+          var token = generateToken(dbAccount.name, dbAccount.username);
           res.json({
             name: dbAccount.name,
             username: dbAccount.username,
