@@ -19,7 +19,9 @@ mongoose.connect(dbLink + "/keeper?retryWrites=true&w=majority", {
 const verify = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (authHeader) {
+    console.log('req.headers,  ',req.headers)
     const token = authHeader.split(" ")[1];
+    console.log('the token is: ',token)
 
     jwt.verify(token, process.env.TOKENSECRET, (err, user) => {
       if (err) {
@@ -27,6 +29,7 @@ const verify = (req, res, next) => {
       }
       console.log("username from the token", user.username);
       req.username = user.username;
+      req.name=user.name;
       next();
     });
   } else {
@@ -45,7 +48,7 @@ app.get("/todo", verify, async function (req, res) {
 
 app.post("/todo", verify, async function (req, res) {
   console.log("request came in");
-  var content = req.body.content;
+  var content = req.content;
   var username = req.username;
   var newItem = new mongoModelItems({
     username: username,
@@ -131,12 +134,18 @@ app.post("/register", function (req, res) {
 
 app.post("/refresh", (req, res) => {
   console.log('refresh request here')
+  console.log('refresh tokens: ', refreshTokens)
+
   //take the refresh token from the user
   const refreshToken = req.body.refreshToken;
-
+  console.log('refresh token: ', refreshToken)
+  console.log('includes ',refreshTokens.includes(refreshToken))
   //send error if there is no token or it's invalid
-  if (!refreshToken) return res.status(401).json("You are not authenticated!");
+  if (!refreshToken){
+    console.log('401 error here')
+    return res.status(401).json("You are not authenticated!");}
   if (!refreshTokens.includes(refreshToken)) {
+    console.log('403 error here')
     return res.status(403).json("Refresh token is not valid!");
   }
   jwt.verify(refreshToken, process.env.REFRESHTOKENSECRET, (err, user) => {
@@ -148,8 +157,8 @@ app.post("/refresh", (req, res) => {
 
     res.status(200).json({
       name:user.name,
-      username:usesr.username,
-      accessToken: newAccessToken,
+      username:user.username,
+      token: newAccessToken,
       refreshToken: newRefreshToken,
     });
   });

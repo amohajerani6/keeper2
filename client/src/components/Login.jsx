@@ -5,13 +5,6 @@ import axios from "axios";
 function Login() {
   var token = localStorage.getItem("token");
   const navigate = useNavigate();
-  // If already has a token, go to the todo list
-  useEffect(() => {
-    if (token) {
-      console.log(token)
-      //navigate("/todo");
-    }
-  }, []);
 
   const [loginData, setLoginData] = useState({ username: "", password: "" });
 

@@ -28,9 +28,11 @@ function Todo() {
     let currentDate = new Date();
     const decodedToken = jwt_decode(userInfo.token);
     if (decodedToken.exp * 1000 < currentDate.getTime()) {
+      // The problem is that the GetRefreshToken does not return anything
       const data = await GetRefreshToken(userInfo.refreshToken);
       config.headers["authorization"] = "Bearer " + data.token;
-    }
+    } else {
+      config.headers["authorization"] = "Bearer " + userInfo.token;}
     return config;
   },
   (error) => {
@@ -39,12 +41,16 @@ function Todo() {
 );
 
   const [allCards, setAllCards] = useState([]);
+
   var name = userInfo.name;
   useEffect(() => {
     async function fetchData() {
-      const res = await axiosJWT.get("http://localhost:3001/todo", {
+      console.log('')
+      const res = await axiosJWT.get("http://localhost:3001/todo",
+      {
         headers: { authorization: "Bearer " + userInfo.token },
-      });
+      }
+      );
       setAllCards(res.data);
     }
     fetchData();
@@ -59,8 +65,6 @@ function Todo() {
         {
           username: userInfo.username,
           content: content,
-        },
-        {
           headers: { authorization: "Bearer " + userInfo.token },
         }
       );
