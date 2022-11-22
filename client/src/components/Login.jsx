@@ -8,7 +8,8 @@ function Login() {
   // If already has a token, go to the todo list
   useEffect(() => {
     if (token) {
-      navigate("/todo");
+      console.log(token)
+      //navigate("/todo");
     }
   }, []);
 

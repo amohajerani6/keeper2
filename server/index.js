@@ -53,16 +53,16 @@ app.post("/todo", verify, async function (req, res) {
   });
   await newItem.save();
 });
+let refreshTokens = [];
 
 function generateToken(name, username) {
   console.log("name", name);
   console.log("username", username);
   // Token expiry in 15 seconds
   var token = jwt.sign(
-    { name: name, username: username, exp: Math.floor(Date.now() / 1000) + 10 },
+    { name: name, username: username, exp: Math.floor(Date.now() / 1000) + 20 },
     process.env.TOKENSECRET
   );
-  console.log(token);
   return token;
 }
 
@@ -70,10 +70,10 @@ function generateRefreshToken(name, username) {
   console.log("name", name);
   console.log("username", username);
   var token = jwt.sign(
-    { name: name, username: username },
+    { name: name, username: username, exp: Math.floor(Date.now() / 1000) + 60*60*24*2 },
     process.env.REFRESHTOKENSECRET
   );
-  console.log(token);
+  refreshTokens.push(token);
   return token;
 }
 
@@ -127,5 +127,37 @@ app.post("/register", function (req, res) {
     }
   });
 });
+
+
+app.post("/refresh", (req, res) => {
+  console.log('refresh request here')
+  //take the refresh token from the user
+  const refreshToken = req.body.refreshToken;
+
+  //send error if there is no token or it's invalid
+  if (!refreshToken) return res.status(401).json("You are not authenticated!");
+  if (!refreshTokens.includes(refreshToken)) {
+    return res.status(403).json("Refresh token is not valid!");
+  }
+  jwt.verify(refreshToken, process.env.REFRESHTOKENSECRET, (err, user) => {
+    err && console.log(err);
+    refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
+
+    const newAccessToken = generateToken(user.name, user.username);
+    const newRefreshToken = generateRefreshToken(user.name,user.username);
+
+    res.status(200).json({
+      name:user.name,
+      username:usesr.username,
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    });
+  });
+
+  //if everything is ok, create new access token, refresh token and send to user
+});
+
+
+
 
 app.listen(3001, console.log("server running on port 3001"));

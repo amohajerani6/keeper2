@@ -12,7 +12,6 @@ function getCard(content, id, removeCard) {
 }
 
 function Todo() {
-  axios.interceptors.request.use(RefreshIntercept);
   var userInfo = JSON.parse(localStorage.getItem("token"));
   const navigate = useNavigate();
   useEffect(() => {
@@ -20,11 +19,16 @@ function Todo() {
       navigate("/");
     }
   }, []);
+
+  const axiosJWT = axios.create()
+
+  axiosJWT.interceptors.request.use((config)=>{RefreshIntercept(config)});
+
   const [allCards, setAllCards] = useState([]);
   var name = userInfo.name;
   useEffect(() => {
     async function fetchData() {
-      const res = await axios.get("http://localhost:3001/todo", {
+      const res = await axiosJWT.get("http://localhost:3001/todo", {
         headers: { authorization: "Bearer " + userInfo.token },
       });
       setAllCards(res.data);
@@ -36,7 +40,7 @@ function Todo() {
     // Add the new card to the db
     async function postData(content) {
       var userInfo = JSON.parse(localStorage.getItem("token"));
-      await axios.post(
+      await axiosJWT.post(
         "http://localhost:3001/todo",
         {
           username: userInfo.username,
