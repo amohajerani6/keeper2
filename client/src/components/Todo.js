@@ -5,7 +5,9 @@ import Card from "./Card";
 import NewCard from "./newCard";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import RefreshIntercept from "./RefreshAuth";
+import GetRefreshToken from "./RefreshAuth";
+import jwt_decode from "jwt-decode";
+
 
 function getCard(content, id, removeCard) {
   return <Card key={id} id={id} txt={content} removeCard={removeCard} />;
@@ -22,7 +24,19 @@ function Todo() {
 
   const axiosJWT = axios.create()
 
-  axiosJWT.interceptors.request.use((config)=>{RefreshIntercept(config)});
+  axiosJWT.interceptors.request.use( async (config) => {
+    let currentDate = new Date();
+    const decodedToken = jwt_decode(userInfo.token);
+    if (decodedToken.exp * 1000 < currentDate.getTime()) {
+      const data = await GetRefreshToken(userInfo.refreshToken);
+      config.headers["authorization"] = "Bearer " + data.accessToken;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
   const [allCards, setAllCards] = useState([]);
   var name = userInfo.name;
