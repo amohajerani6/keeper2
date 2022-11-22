@@ -29,7 +29,7 @@ function Todo() {
     const decodedToken = jwt_decode(userInfo.token);
     if (decodedToken.exp * 1000 < currentDate.getTime()) {
       const data = await GetRefreshToken(userInfo.refreshToken);
-      config.headers["authorization"] = "Bearer " + data.accessToken;
+      config.headers["authorization"] = "Bearer " + data.token;
     }
     return config;
   },
@@ -84,7 +84,7 @@ function Todo() {
     localStorage.removeItem("token");
 
     navigate("/");
-    //e.preventDefault();
+    e.preventDefault();
   }
 
   return (
