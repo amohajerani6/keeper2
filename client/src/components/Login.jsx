@@ -4,8 +4,13 @@ import axios from "axios";
 
 function Login() {
   var token = localStorage.getItem("token");
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (token) {
+      navigate("/todo");
+    }
+  }, []);
   const [loginData, setLoginData] = useState({ username: "", password: "" });
 
   function onChangeFunc(event) {

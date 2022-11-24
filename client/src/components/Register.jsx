@@ -8,7 +8,7 @@ function Register() {
   // If already has a token, go to the todo list
   useEffect(() => {
     if (token) {
-     // navigate("/todo");
+      navigate("/todo");
     }
   }, []);
   const [loginData, setLoginData] = useState({

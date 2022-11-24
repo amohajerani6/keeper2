@@ -19,9 +19,9 @@ mongoose.connect(dbLink + "/keeper?retryWrites=true&w=majority", {
 const verify = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (authHeader) {
-    console.log('req.headers,  ',req.headers)
+    console.log("req.headers,  ", req.headers);
     const token = authHeader.split(" ")[1];
-    console.log('the token is: ',token)
+    console.log("the token is: ", token);
 
     jwt.verify(token, process.env.TOKENSECRET, (err, user) => {
       if (err) {
@@ -29,7 +29,7 @@ const verify = (req, res, next) => {
       }
       console.log("username from the token", user.username);
       req.username = user.username;
-      req.name=user.name;
+      req.name = user.name;
       next();
     });
   } else {
@@ -73,7 +73,11 @@ function generateRefreshToken(name, username) {
   console.log("name", name);
   console.log("username", username);
   var token = jwt.sign(
-    { name: name, username: username, exp: Math.floor(Date.now() / 1000) + 60*60*24*2 },
+    {
+      name: name,
+      username: username,
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 2,
+    },
     process.env.REFRESHTOKENSECRET
   );
   refreshTokens.push(token);
@@ -131,21 +135,27 @@ app.post("/register", function (req, res) {
   });
 });
 
+app.post("/logout", verify, function (req, res) {
+  var refreshToken = req.refreshToken;
+  refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
+  console.log("logged out");
+});
 
 app.post("/refresh", (req, res) => {
-  console.log('refresh request here')
-  console.log('refresh tokens: ', refreshTokens)
+  console.log("refresh request here");
+  console.log("refresh tokens: ", refreshTokens);
 
   //take the refresh token from the user
   const refreshToken = req.body.refreshToken;
-  console.log('refresh token: ', refreshToken)
-  console.log('includes ',refreshTokens.includes(refreshToken))
+  console.log("refresh token: ", refreshToken);
+  console.log("includes ", refreshTokens.includes(refreshToken));
   //send error if there is no token or it's invalid
-  if (!refreshToken){
-    console.log('401 error here')
-    return res.status(401).json("You are not authenticated!");}
+  if (!refreshToken) {
+    console.log("401 error here");
+    return res.status(401).json("You are not authenticated!");
+  }
   if (!refreshTokens.includes(refreshToken)) {
-    console.log('403 error here')
+    console.log("403 error here");
     return res.status(403).json("Refresh token is not valid!");
   }
   jwt.verify(refreshToken, process.env.REFRESHTOKENSECRET, (err, user) => {
@@ -153,11 +163,11 @@ app.post("/refresh", (req, res) => {
     refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
 
     const newAccessToken = generateToken(user.name, user.username);
-    const newRefreshToken = generateRefreshToken(user.name,user.username);
+    const newRefreshToken = generateRefreshToken(user.name, user.username);
 
     res.status(200).json({
-      name:user.name,
-      username:user.username,
+      name: user.name,
+      username: user.username,
       token: newAccessToken,
       refreshToken: newRefreshToken,
     });
@@ -165,8 +175,5 @@ app.post("/refresh", (req, res) => {
 
   //if everything is ok, create new access token, refresh token and send to user
 });
-
-
-
 
 app.listen(3001, console.log("server running on port 3001"));
