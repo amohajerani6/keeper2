@@ -176,4 +176,7 @@ app.post("/refresh", (req, res) => {
   //if everything is ok, create new access token, refresh token and send to user
 });
 
-app.listen(3001, console.log("server running on port 3001"));
+app.listen(
+  process.env.PORT || 3001,
+  console.log("server running on port 3001")
+);
